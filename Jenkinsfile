@@ -106,6 +106,21 @@ def init_git() {
   }
 }
 
+def should_skip_slow_tests(pr_number) {
+  withCredentials([string(
+    credentialsId: 'tvm-bot-jenkins-reader',
+    variable: 'GITHUB_TOKEN',
+  )]) {
+    // Exit code of 1 means run slow tests, exit code of 0 means skip slow tests
+    result = sh (
+      returnStatus: true,
+      script: "./tests/scripts/should_run_slow_tests.py --pr '${pr_number}'",
+      label: 'Check if CI should run slow tests',
+    )
+  }
+  return result == 0
+}
+
 def cancel_previous_build() {
   // cancel previous build if it is not on main.
   if (env.BRANCH_NAME != 'main') {
@@ -170,6 +185,7 @@ stage('Sanity Check') {
           label: 'Check for docs only changes',
         )
         skip_ci = should_skip_ci(env.CHANGE_ID)
+        skip_slow_tests = should_skip_slow_tests(env.CHANGE_ID)
         sh (
           script: "${docker_run} ${ci_lint}  ./tests/scripts/task_lint.sh",
           label: 'Run lint',
@@ -258,6 +274,9 @@ def cpp_unittest(image) {
 }
 
 stage('Build') {
+    environment {
+      SKIP_SLOW_TESTS = "${skip_slow_tests}"
+    }
     parallel 'BUILD: GPU': {
       if (!skip_ci) {
         node('GPUBUILD') {
@@ -380,6 +399,9 @@ stage('Build') {
 }
 
 stage('Test') {
+    environment {
+      SKIP_SLOW_TESTS = "${skip_slow_tests}"
+    }
     parallel 'unittest: GPU': {
       if (!skip_ci && is_docs_only_build != 1) {
         node('TensorCore') {
