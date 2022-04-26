@@ -110,6 +110,37 @@ class ThreadGroup {
   Impl* impl_;
 };
 
+class ThreadGroup::Impl {
+ public:
+  virtual void Join() {}
+  virtual int Configure(AffinityMode mode, int nthreads, bool exclude_worker0,
+                        std::vector<unsigned int> cpus) = 0;
+  virtual ~Impl() { Join(); }
+};
+
+template <class ThreadType>
+class ThreadGroupImplTemplate : public ThreadGroup::Impl {
+ public:
+  virtual void Join() {
+    for (auto& t : threads_) {
+      if (t.joinable()) t.join();
+    }
+  }
+
+ protected:
+  ThreadGroupImplTemplate(int num_workers, std::function<void(int)> worker_callback,
+                          bool exclude_worker0)
+      : num_workers_(num_workers) {
+    ICHECK_GE(num_workers, 1) << "Requested a non-positive number of worker threads.";
+    for (int i = exclude_worker0; i < num_workers_; ++i) {
+      threads_.emplace_back([worker_callback, i] { worker_callback(i); });
+    }
+  }
+
+  int num_workers_;
+  std::vector<ThreadType> threads_;
+};
+
 /*!
  * \brief Platform-agnostic no-op.
  */
@@ -145,6 +176,13 @@ void Configure(tvm::runtime::threading::ThreadGroup::AffinityMode mode, int nthr
  * \returns The number of threads used.
  */
 int32_t NumThreads();
+
+/*!
+ * \brief Construct a ThreadGroup::Impl for the platform we're running on.
+ * \returns A ThreadGroup::Impl
+ */
+ThreadGroup::Impl* CreateThreadGroupImpl(int num_workers, std::function<void(int)> worker_callback,
+                                         bool exclude_worker0);
 
 }  // namespace threading
 }  // namespace runtime

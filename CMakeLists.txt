@@ -103,7 +103,6 @@ tvm_option(USE_COREML "Build with coreml support" OFF)
 tvm_option(USE_BNNS "Build with BNNS support" OFF)
 tvm_option(USE_TARGET_ONNX "Build with ONNX Codegen support" OFF)
 tvm_option(USE_ARM_COMPUTE_LIB "Build with Arm Compute Library" OFF)
-tvm_option(USE_ARM_COMPUTE_LIB_GRAPH_EXECUTOR "Build with Arm Compute Library graph executor" OFF)
 tvm_option(USE_TENSORRT_CODEGEN "Build with TensorRT Codegen support" OFF)
 tvm_option(USE_TENSORRT_RUNTIME "Build with TensorRT runtime" OFF)
 tvm_option(USE_RUST_EXT "Build with Rust based compiler extensions, STATIC, DYNAMIC, or OFF" OFF)
@@ -337,6 +336,10 @@ if(BUILD_FOR_HEXAGON)
 
   add_definitions(-D_MACH_I32=int)
   add_definitions(-DDMLC_CXX11_THREAD_LOCAL=0)
+
+  list(APPEND RUNTIME_SRCS src/runtime/hexagon/threading_hexagon.cc)
+else()
+  list(APPEND RUNTIME_SRCS src/runtime/posix/threading_posix.cc)
 endif()
 
 # Package runtime rules
