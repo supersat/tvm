@@ -175,6 +175,16 @@ TVM_REGISTER_GLOBAL("device_api.hexagon.mem_copy").set_body([](TVMArgs args, TVM
   *rv = static_cast<int32_t>(0);
 });
 
+TVM_REGISTER_GLOBAL("device_api.hexagon.mem_copy_DLTensor").set_body([](TVMArgs args, TVMRetValue* rv) {
+  DLTensor* dst = args[0];
+  DLTensor* src = args[1];
+  int size = args[2];
+
+  hexagon_user_dma_1d_sync(dst->data, src->data, size);
+
+  *rv = static_cast<int32_t>(0);
+});
+
 TVM_REGISTER_GLOBAL("device_api.hexagon.alloc_nd").set_body([](TVMArgs args, TVMRetValue* rv) {
   int32_t device_type = args[0];
   int32_t device_id = args[1];

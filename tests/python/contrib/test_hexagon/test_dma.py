@@ -90,20 +90,20 @@ class TestSingleDMA:
 
     dtype = tvm.testing.parameter("int8")
     size = tvm.testing.parameter(
-        # 128,
-        # 256,
-        # 512,
-        # 1024,
-        # 2048,
-        # 4096,
-        # 8192,
-        # 16384,
-        # 32768,
-        # 65536,
-        # 131072,
-        # 262144,
-        524288,
-        # 1048576, # TODO(csullivan): Investigate bug with DMA copy for this size.
+        2 << 6,
+        2 << 7,
+        2 << 8,
+        2 << 9,
+        2 << 10,
+        2 << 11,
+        2 << 12,
+        2 << 13,
+        2 << 14,
+        2 << 15,
+        2 << 16,
+        2 << 17,
+        2 << 18,
+        2 << 19,
     )
     x_scope = tvm.testing.parameter("global")
     y_scope = tvm.testing.parameter("global.vtcm")
@@ -145,12 +145,14 @@ class TestSingleDMA:
             sch.unroll(io)
             sch.parallel(o)
             sch.vectorize(ii)
-        print("Vector latency: ", sch.mod["main"].script())
         mod = tvm.build(sch.mod["main"], target=tvm_target)
         mod = module_loader(mod, hexagon_session)
 
         x, y = dma_ndarrays
         timer = mod.time_evaluator("__tvm_main__", hexagon_session.device, number=100, repeat=2)
         timing_result = timer(x, y)
-        print("DMA latency: ", timing_result)
+        if tensorize_dma:
+            print("DMA latency: ", timing_result)
+        else:
+            print("Vector latency: ", timing_result)
         tvm.testing.assert_allclose(x.numpy(), y.numpy(), atol=1e-4, rtol=1e-4)
