@@ -151,8 +151,20 @@ class TestSingleDMA:
         x, y = dma_ndarrays
         timer = mod.time_evaluator("__tvm_main__", hexagon_session.device, number=100, repeat=2)
         timing_result = timer(x, y)
+        print()
+        print(
+            "Memcopy of size: ",
+            float(size) / (1024 * 1024),
+            "MB",
+            " src-to-dst-scopes: ",
+            x_scope,
+            " -> ",
+            y_scope,
+        )
         if tensorize_dma:
-            print("DMA latency: ", timing_result)
+            # print("DMA latency: ", timing_result)
+            print("DMA Bandwidth: ", float(size) / timing_result.mean / 1.0e9)
         else:
-            print("Vector latency: ", timing_result)
+            # print("Vector latency: ", timing_result)
+            print("Vector Bandwidth: ", float(size) / timing_result.mean / 1.0e9)
         tvm.testing.assert_allclose(x.numpy(), y.numpy(), atol=1e-4, rtol=1e-4)
