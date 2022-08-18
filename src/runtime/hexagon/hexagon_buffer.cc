@@ -62,7 +62,7 @@ struct VTCMAllocation : public Allocation {
 
     // allocate nbytes of vtcm on a single page
     HEXAGON_SAFE_CALL(HAP_compute_res_attr_set_vtcm_param(&res_info, /*vtcm_size = */ nbytes,
-                                                          /*b_single_page = */ 1));
+                                                          /*b_single_page = */ 0));
 
     // TODO(HWE): Investigate why a non-zero timeout results in
     // hanging, both in the simulator and on hardware.
