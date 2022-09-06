@@ -39,6 +39,9 @@ int init_hexagon_user_dma() {
   return DMA_SUCCESS;
 }
 
+//#define IS_VTCM(addr) ((addr & 0xfff00000) == 0xff000000)
+#define IS_VTCM(addr) (1)
+
 int hexagon_user_dma_1d_sync_helper(void* dst, void* src, uint32_t length) {
 #if __HEXAGON_ARCH__ >= 68
   static int config_dma = init_hexagon_user_dma();
@@ -66,6 +69,8 @@ int hexagon_user_dma_1d_sync_helper(void* dst, void* src, uint32_t length) {
   uint32_t src32 = src64 & DESC_SRC_MASK;
   uint32_t dst32 = dst64 & DESC_DST_MASK;
 
+  HEXAGON_PRINT(ERROR, "Doing DMA from %08x to %08x", src32, dst32);
+
   void* dma_desc = nullptr;
 
   int ret = posix_memalign(&dma_desc, DMA_DESC_2D_SIZE, DMA_DESC_2D_SIZE);
@@ -83,8 +88,8 @@ int hexagon_user_dma_1d_sync_helper(void* dst, void* src, uint32_t length) {
   dma_desc_set_desctype(dma_desc, DESC_DESCTYPE_1D);
   dma_desc_set_dstcomp(dma_desc, DESC_COMP_NONE);
   dma_desc_set_srccomp(dma_desc, DESC_COMP_NONE);
-  dma_desc_set_bypassdst(dma_desc, DESC_BYPASS_OFF);
-  dma_desc_set_bypasssrc(dma_desc, DESC_BYPASS_OFF);
+  dma_desc_set_bypassdst(dma_desc, IS_VTCM(dst32) ? DESC_BYPASS_OFF : DESC_BYPASS_ON);
+  dma_desc_set_bypasssrc(dma_desc, IS_VTCM(src32) ? DESC_BYPASS_OFF : DESC_BYPASS_ON);
   dma_desc_set_order(dma_desc, DESC_ORDER_ORDER);
   dma_desc_set_done(dma_desc, DESC_DONE_INCOMPLETE);
   dma_desc_set_src(dma_desc, src32);
