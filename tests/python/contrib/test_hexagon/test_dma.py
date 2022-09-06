@@ -47,20 +47,20 @@ def single_dma_primfunc(size, dtype, x_scope, y_scope, tensorize_dma):
                 T.tvm_call_packed(
                     "device_api.hexagon.mem_copy_DLTensor",
                     T.tvm_stack_make_array(
-                        X.data,
-                        T.tvm_stack_make_shape(size, dtype="handle"),
-                        0,
-                        1,
-                        X.dtype,
-                        0,
-                        dtype="handle",
-                    ),
-                    T.tvm_stack_make_array(
                         Y.data,
                         T.tvm_stack_make_shape(size, dtype="handle"),
                         0,
                         1,
                         Y.dtype,
+                        0,
+                        dtype="handle",
+                    ),
+                    T.tvm_stack_make_array(
+                        X.data,
+                        T.tvm_stack_make_shape(size, dtype="handle"),
+                        0,
+                        1,
+                        X.dtype,
                         0,
                         dtype="handle",
                     ),
@@ -90,12 +90,12 @@ class TestSingleDMA:
 
     dtype = tvm.testing.parameter("int8")
     size = tvm.testing.parameter(2 << 19, 2 << 20)
-    x_scope = tvm.testing.parameter("global")
-    y_scope = tvm.testing.parameter("global.vtcm")
+    scopes = tvm.testing.parameter(("global", "global.vtcm"), ("global.vtcm", "global"))
     tensorize_dma = tvm.testing.parameter(False, True)
 
     @tvm.testing.fixture
-    def dma_ndarrays(self, size, dtype, hexagon_session, numpy_data_range, x_scope, y_scope):
+    def dma_ndarrays(self, size, dtype, hexagon_session, numpy_data_range, scopes):
+        (x_scope, y_scope) = scopes
         x = np.random.randint(
             low=numpy_data_range[0], high=numpy_data_range[1], size=size, dtype=dtype
         )
@@ -116,12 +116,12 @@ class TestSingleDMA:
         hexagon_session,
         dtype,
         size,
-        x_scope,
-        y_scope,
+        scopes,
         tvm_target,
         dma_ndarrays,
         tensorize_dma,
     ):
+        x_scope, y_scope = scopes
         sch = tir.Schedule(single_dma_primfunc(size, dtype, x_scope, y_scope, tensorize_dma))
         if tensorize_dma == False:
             dma_block = sch.get_block("dma_copy")
