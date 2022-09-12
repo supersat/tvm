@@ -39,8 +39,10 @@ int init_hexagon_user_dma() {
   return DMA_SUCCESS;
 }
 
-//#define IS_VTCM(addr) ((addr & 0xfff00000) == 0xff000000)
-#define IS_VTCM(addr) (1)
+// For 8 Gen 1
+#define IS_VTCM(addr) ((addr & 0xfff00000) == 0xff000000)
+// For 888
+//#define IS_VTCM(addr) ((addr & 0xfff00000) == 0xfec00000)
 
 int hexagon_user_dma_1d_sync_helper(void* dst, void* src, uint32_t length) {
 #if __HEXAGON_ARCH__ >= 68
