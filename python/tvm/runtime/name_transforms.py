@@ -14,23 +14,19 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-"""Default schedule rules"""
-from typing import List, Tuple, Union
+"""
+Name transformation functions shared in Backend and Runtime
+"""
 
-from tvm.meta_schedule import default_config
-from tvm.meta_schedule.schedule_rule import ScheduleRule
+from . import _ffi_api
 
 
-def get_rules(kind: str, types: Union[type, Tuple[type, ...]]) -> List[ScheduleRule]:
-    """Get default schedule rules"""
-    # pylint: disable=protected-access
-    if kind == "llvm":
-        rules = default_config._DefaultLLVM.schedule_rules()
-    elif kind == "cuda":
-        rules = default_config._DefaultCUDA.schedule_rules()
-    elif kind == "tensor_core":
-        rules = default_config._DefaultCUDATensorCore.schedule_rules()
-    else:
-        raise NotImplementedError(f"{kind} is not supported")
-    # pylint: enable=protected-access
-    return [rule for rule in rules if isinstance(rule, types)]
+def sanitize_name(original_name: str):
+    """Sanitize name for output into compiler artifacts
+
+    Parameters
+    ----------
+    original_name : str
+        Original name to sanitize
+    """
+    return _ffi_api.SanitizeName(original_name)

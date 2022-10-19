@@ -92,6 +92,7 @@ We do encourage everyone to work anything they are interested in.
 - [Aditya Atluri](https://github.com/adityaatluri): @adityaatluri
 - [Matthew Barrett](https://github.com/mbaret): @mbaret
 - [Arnaud Bergeron](https://github.com/abergeron): @abergeron
+- [Florin Blanaru](https://github.com/gigiblender): @gigiblender
 - [Matthew Brookhart](https://github.com/mbrookhart): @mbrookhart
 - [Yaxing Cai](https://github.com/cyx-6): @cyx-6
 - [Liangfu Chen](https://github.com/liangfu): @liangfu
@@ -173,6 +174,7 @@ We do encourage everyone to work anything they are interested in.
 - [Jon Soifer](https://github.com/soiferj): @soiferj
 - [Adam Straw](https://github.com/adstraw): @adstraw
 - [Chris Sullivan](https://github.com/csullivan): @csullivan
+- [Anirudh Sundar Subramaniam](https://github.com/quic-sanirudh): @quic-sanirudh
 - [Zhixun Tan](https://github.com/phisiart): @phisiart
 - [Andrew Tulloch](https://github.com/ajtulloch): @ajtulloch
 - [Jorn Tuyls](https://github.com/jtuyls): @jtuyls
