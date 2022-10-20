@@ -18,6 +18,7 @@
  */
 
 #include <HAP_compute_res.h>
+#include <HAP_farf.h>
 #include <hexagon_types.h>
 #include <hvx_hexagon_protos.h>
 #include <tvm/runtime/c_runtime_api.h>
@@ -479,6 +480,10 @@ int conv2d_packed_fp16(TVMValue* args, int* type_codes, int num_args, TVMValue* 
 
   hexagonrt::deblockize_hwc_16b(out_flat->data, out_vtcm.data, out_flat->shape[1],
                                 out_flat->shape[2], out_flat->shape[3]);
+
+  for (size_t i = 0; i < out_flat->shape[1] * out_flat->shape[2] * out_flat->shape[3]; i++) {
+    FARF(ALWAYS, "out_flat[%d]: %f (%04x)", i, ((__fp16 *)out_flat->data)[i], ((uint16_t *)out_flat->data)[i]);
+  }
 
   device_api->FreeDataSpace(hexagonrt::hexagon_device, zero_block);
   hexagonrt::release(device_api, out_vtcm);

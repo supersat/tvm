@@ -76,6 +76,7 @@ struct VTCMAllocation : public Allocation {
       allocation_nbytes_ = nbytes;
     }
     data_ = HexagonDeviceAPI::Global()->VtcmPool()->Allocate(allocation_nbytes_);
+    memset(data_, 0xC3, allocation_nbytes_);
     DLOG(INFO) << "VTCMAllocation " << data_ << " " << allocation_nbytes_ << " " << alignment;
   }
   ~VTCMAllocation() {

@@ -18,6 +18,7 @@
  */
 
 #include "tvm/runtime/hexagon/ops/conv2d.h"
+#include "HAP_farf.h"
 
 namespace tvm {
 namespace runtime {
@@ -200,6 +201,12 @@ SDLTensor<4> prepare_nhwc(tvm::runtime::DeviceAPI* device_api, const DLTensor* n
   if (copy_data) {
     blockize_hwc_16b(nhwc_vtcm, nhwc_flat->data, nhwc_flat->shape[1], nhwc_flat->shape[2],
                      nhwc_flat->shape[3]);
+    for (size_t o = 0; o < shape_2d[0]; o++) {
+      for (size_t i = 0; i < shape_2d[1]; i++) {
+        __fp16* block = ((__fp16 **)nhwc_vtcm)[o];
+        FARF(ALWAYS, "prepare_nhwc(%d, %d): %f (%04x)", o, i, ((__fp16 *)block)[i], ((uint16_t *)block)[i]);
+      }
+    }
   }
 
   return SDLTensor<4>(nhwc_vtcm, nhwc_flat->dtype, nhwc_vtcm, {n, h / 8, w / 4, c / 32});
@@ -224,6 +231,10 @@ SDLTensor<4> prepare_hwio(tvm::runtime::DeviceAPI* device_api, const DLTensor* h
 
   chunkify_hwio_16b(ptr_table, num_chunks, hwio_vtcm, hwio_flat->data, hwio_flat->shape[0],
                     hwio_flat->shape[1], hwio_flat->shape[2], hwio_flat->shape[3]);
+
+  for (size_t i = 0; i < shape_1d[0]; i++) {
+    FARF(ALWAYS, "prepare_hwio(): %f (%04x)", ((__fp16 *)hwio_vtcm)[i], ((uint16_t *)hwio_vtcm)[i]);
+  }
 
   return SDLTensor<4>(ptr_table, hwio_flat->dtype, hwio_vtcm,
                       {round_up(h, 8) / 8, round_up(w, 4) / 4, i / 32, o / 32});
