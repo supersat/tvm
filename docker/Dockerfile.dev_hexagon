@@ -16,28 +16,28 @@
 # under the License.
 
 # Build the latest LLVM from source to address Hexagon codegen bugs
-FROM ubuntu:20.04 as llvm-builder
-RUN apt-get update --fix-missing
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ cmake ninja-build python3
-ENV LLVM_HASH=1c9a93ae3ad0d8d085efe3af38ca65e4a7b2f307
-ENV LLVM_SRC_ROOT=/llvm
-RUN mkdir ${LLVM_SRC_ROOT} && \
-    cd ${LLVM_SRC_ROOT} && \
-    git init . && \
-    git remote add origin https://github.com/llvm/llvm-project.git && \
-    git fetch --depth=1 origin ${LLVM_HASH} && \
-    git reset --hard FETCH_HEAD
-WORKDIR ${LLVM_SRC_ROOT}
-RUN cmake -S llvm -B build -G Ninja -DLLVM_ENABLE_PROJECTS="clang" \
-    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_TARGETS_TO_BUILD="X86;AArch64;Hexagon" -DCMAKE_INSTALL_PREFIX=/opt/llvm && \
-    cmake --build build && cmake --install build
+# FROM ubuntu:20.04 as llvm-builder
+# RUN apt-get update --fix-missing
+# RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ cmake ninja-build python3
+# ENV LLVM_HASH=1c9a93ae3ad0d8d085efe3af38ca65e4a7b2f307
+# ENV LLVM_SRC_ROOT=/llvm
+# RUN mkdir ${LLVM_SRC_ROOT} && \
+#     cd ${LLVM_SRC_ROOT} && \
+#     git init . && \
+#     git remote add origin https://github.com/llvm/llvm-project.git && \
+#     git fetch --depth=1 origin ${LLVM_HASH} && \
+#     git reset --hard FETCH_HEAD
+# WORKDIR ${LLVM_SRC_ROOT}
+# RUN cmake -S llvm -B build -G Ninja -DLLVM_ENABLE_PROJECTS="clang" \
+#     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" -DCMAKE_BUILD_TYPE=Release \
+#     -DLLVM_TARGETS_TO_BUILD="X86;AArch64;Hexagon" -DCMAKE_INSTALL_PREFIX=/opt/llvm && \
+#     cmake --build build && cmake --install build
 
 # Import Hexagon SDK
 FROM tvmcihexagon/ci-hexagon-base:v0.03_SDK5.1.0.0
 RUN apt-get update --fix-missing 
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y git g++ cmake python3 libncurses5
-COPY --from=llvm-builder /opt/llvm /opt/llvm
+# COPY --from=llvm-builder /opt/llvm /opt/llvm
 ENV HEXAGON_SDK_ROOT=${HEXAGON_SDK_PATH}
 ENV HEXAGON_TOOLCHAIN=${HEXAGON_SDK_ROOT}/tools/HEXAGON_Tools/8.5.13/Tools
 ENV PATH="${HEXAGON_TOOLCHAIN}/bin:${HEXAGON_SDK_ROOT}/tools/cmake-3.22.2-linux-x86_64/bin:${PATH}"
