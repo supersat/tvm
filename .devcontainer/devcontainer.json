@@ -1,0 +1,8 @@
+{
+    "name": "TVM for Hexagon Development",
+    "build": { "dockerfile": "${localWorkspaceFolder}/docker/Dockerfile.dev_hexagon" },
+    "remoteEnv": {
+        "TVM_HOME": "${containerWorkspaceFolder}"
+    },
+    "updateContentCommand": "${containerWorkspaceFolder}/.devcontainer/update_content_hexagon.sh"
+}
