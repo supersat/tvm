@@ -1,6 +1,6 @@
 {
     "name": "TVM for Hexagon Development",
-    "build": { "dockerfile": "${localWorkspaceFolder}/docker/Dockerfile.dev_hexagon" },
+    "image": "supersat/tvm-hexagon-devcontainer",
     "remoteEnv": {
         "TVM_HOME": "${containerWorkspaceFolder}"
     },
